@@ -282,6 +282,8 @@ for significantly better compression.
         NSString* resourcePath = [command argumentAtIndex:1];
         NSDictionary* options = [command argumentAtIndex:2 withDefault:nil];
 
+        resourcePath = [resourcePath stringByReplacingOccurrencesOfString: @" " withString: @"%20"];
+
         BOOL bError = NO;
         NSString* jsString = nil;
 
