@@ -37,6 +37,7 @@ for significantly better compression.
 
 #import "CDVSound.h"
 #import "CDVFile.h"
+#import <MediaPlayer/MediaPlayer.h>
 
 #define DOCUMENTS_SCHEME_PREFIX @"documents://"
 #define HTTP_SCHEME_PREFIX @"http://"
@@ -45,8 +46,33 @@ for significantly better compression.
 #define RECORDING_M4A @"m4a"
 
 @implementation CDVSound
+{
+    MPVolumeView *volumeView;
+    UISlider *volumeSlider;
+}
 
 @synthesize soundCache, avSession;
+
+/**
+ * Initialize the plugin.
+ */
+- (void) pluginInitialize
+{
+    // Below code creates a hidden volume slider view as suvbiew. This is then used to enable
+    // adjustment of the devices media volume without seeing any indication on the screen
+    // that it has been changed.
+    UIView *volumeHolder = [[UIView alloc] initWithFrame: CGRectMake(0, -25, 260, 20)];
+    [volumeHolder setBackgroundColor: [UIColor clearColor]];
+    [self.webView addSubview: volumeHolder];
+    volumeView = [[MPVolumeView alloc] initWithFrame: volumeHolder.bounds];
+    volumeView.alpha = 0.01;
+    [volumeHolder addSubview: volumeView];
+    for (UIView *subview in volumeView.subviews) {
+        if([subview isKindOfClass:[UISlider class]]) {
+            volumeSlider = subview;
+        }
+    }
+}
 
 // Maps a url for a resource path for recording
 - (NSURL*)urlForRecording:(NSString*)resourcePath
@@ -282,11 +308,9 @@ for significantly better compression.
         NSString* resourcePath = [command argumentAtIndex:1];
         NSDictionary* options = [command argumentAtIndex:2 withDefault:nil];
 
-        resourcePath = [resourcePath stringByReplacingOccurrencesOfString: @" " withString: @"%20"];
-
         BOOL bError = NO;
         NSString* jsString = nil;
-
+        
         CDVAudioFile* audioFile = [self audioFileForResource:resourcePath withId:mediaId doValidation:YES forRecording:NO];
         if ((audioFile != nil) && (audioFile.resourceURL != nil)) {
             if (audioFile.player == nil) {
@@ -305,6 +329,7 @@ for significantly better compression.
 
                     NSString* sessionCategory = bPlayAudioWhenScreenIsLocked ? AVAudioSessionCategoryPlayback : AVAudioSessionCategorySoloAmbient;
                     [self.avSession setCategory:sessionCategory error:&err];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"CTIAudioPlay" object:nil];
                     if (![self.avSession setActive:YES error:&err]) {
                         // other audio with higher priority that does not allow mixing could cause this to fail
                         NSLog(@"Unable to play audio: %@", [err localizedFailureReason]);
@@ -513,6 +538,20 @@ for significantly better compression.
     NSString* jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_POSITION, position];
     [self.commandDelegate evalJs:jsString];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+}
+
+- (void)getDeviceMediaVolume:(CDVInvokedUrlCommand *)command
+{
+    float vf = [[AVAudioSession sharedInstance] outputVolume];
+    double vd = round(vf*100) / 100;
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:vd];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+}
+
+- (void)setDeviceMediaVolume:(CDVInvokedUrlCommand *)command
+{
+    NSString *volume = [command argumentAtIndex:0];
+    volumeSlider.value = [volume doubleValue];
 }
 
 - (void)startRecordingAudio:(CDVInvokedUrlCommand*)command
@@ -885,6 +924,7 @@ for significantly better compression.
     if (self.avSession) {
         [self.avSession setActive:NO error:nil];
     }
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"CTIAudioFinished" object:self];
     [self.commandDelegate evalJs:jsString];
 }
 
