@@ -58,7 +58,11 @@ for significantly better compression.
  */
 - (void) pluginInitialize
 {
-    // Below code creates a hidden volume slider view as suvbiew. This is then used to enable
+    [self addVolumeSlider];
+}
+
+- (void) addVolumeSlider {
+    // Below creates a hidden slider view as suvbiew. This is then used to enable
     // adjustment of the devices media volume without seeing any indication on the screen
     // that it has been changed.
     UIView *volumeHolder = [[UIView alloc] initWithFrame: CGRectMake(0, -25, 260, 20)];
@@ -542,7 +546,13 @@ for significantly better compression.
 
 - (void)getDeviceMediaVolume:(CDVInvokedUrlCommand *)command
 {
-    float vf = [[AVAudioSession sharedInstance] outputVolume];
+    if (volumeSlider == nil) {
+        [self addVolumeSlider];
+    }
+    float vf = volumeSlider.value;
+    if (vf == 0) {
+        vf = [[AVAudioSession sharedInstance] outputVolume];
+    }
     double vd = round(vf*100) / 100;
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:vd];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -550,6 +560,9 @@ for significantly better compression.
 
 - (void)setDeviceMediaVolume:(CDVInvokedUrlCommand *)command
 {
+    if (volumeSlider == nil) {
+        [self addVolumeSlider];
+    }
     NSString *volume = [command argumentAtIndex:0];
     volumeSlider.value = [volume doubleValue];
 }

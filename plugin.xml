@@ -20,7 +20,7 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
 xmlns:android="http://schemas.android.com/apk/res/android"
-id="com.commontime.cordova.audio" version="0.9.13">
+id="com.commontime.cordova.audio" version="0.9.14">
 
     <name>Media With Compression: Alpha Software Edition</name>
     <description>Cordova Media Plugin with MPEG 4 audio compression for iOS, Android and WP8</description>
@@ -105,6 +105,7 @@ id="com.commontime.cordova.audio" version="0.9.13">
          <config-file target="config.xml" parent="/*">
              <feature name="Media">
                  <param name="ios-package" value="CDVSound" />
+                 <param name="onload" value="true" />
              </feature>
          </config-file>
          <header-file src="src/ios/CDVSound.h" />
