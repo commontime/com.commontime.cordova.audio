@@ -211,11 +211,11 @@ public class AudioHandler extends CordovaPlugin {
             callbackContext.success();
             return true;
         } else if (action.equals("setVolume")) {
-           try {
-               this.setVolume(args.getString(0), Float.parseFloat(args.getString(1)));
-           } catch (NumberFormatException nfe) {
-               //no-op
-           }
+            try {
+                this.setVolume(args.getString(0), Float.parseFloat(args.getString(1)));
+            } catch (NumberFormatException nfe) {
+                //no-op
+            }
         } else if (action.equals("getCurrentPositionAudio")) {
             float f = this.getCurrentPositionAudio(args.getString(0));
             callbackContext.sendPluginResult(new PluginResult(status, f));
@@ -233,6 +233,15 @@ public class AudioHandler extends CordovaPlugin {
             callbackContext.sendPluginResult(new PluginResult(status, f));
             return true;
         }
+
+        else if (action.equals("setStreamId")) {
+            String id = args.getString(0);
+            int streamId = args.getInt(1);
+            setAudioStreamId(id, streamId);
+            callbackContext.success();
+            return true;
+        }
+
         //---
 
         else if (action.equals("create")) {
@@ -249,6 +258,7 @@ public class AudioHandler extends CordovaPlugin {
             messageChannel = callbackContext;
             return true;
         }
+
         else { // Unrecognized action.
             return false;
         }
@@ -256,6 +266,13 @@ public class AudioHandler extends CordovaPlugin {
         callbackContext.sendPluginResult(new PluginResult(status, result));
 
         return true;
+    }
+
+    private void setAudioStreamId(String id, int streamId) {
+        AudioPlayer ret = players.get(id);
+        if(ret != null) {
+            ret.setStreamId(streamId);
+        }
     }
 
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException
@@ -452,10 +469,10 @@ public class AudioHandler extends CordovaPlugin {
      * @param channels          1 or 2, mono or stereo, default value is 1
      * @param sampleRate        sample rate in hz, 8000 to 48000, optional, default value is 44100
      */
-     public void resumeRecordingAudio(String id, String file, Integer channels, Integer sampleRate) {
-       AudioPlayer audio = getOrCreatePlayer(id, file);
-             audio.resumeRecording(file, channels, sampleRate);
-     }
+    public void resumeRecordingAudio(String id, String file, Integer channels, Integer sampleRate) {
+        AudioPlayer audio = getOrCreatePlayer(id, file);
+        audio.resumeRecording(file, channels, sampleRate);
+    }
 
     /**
      * Stop recording.
@@ -515,7 +532,7 @@ public class AudioHandler extends CordovaPlugin {
         }
     }
 
-     /**
+    /**
      * Get dB level of recording microphone power
      * @param id
      * @return dB power level

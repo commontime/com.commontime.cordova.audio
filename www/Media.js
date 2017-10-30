@@ -66,12 +66,23 @@ Media.MEDIA_PAUSED = 3;
 Media.MEDIA_STOPPED = 4;
 Media.MEDIA_MSG = ["None", "Starting", "Running", "Paused", "Stopped"];
 
+// Stream ids
+Media.STREAM_ALARM = 4;
+Media.STREAM_DTMF = 8;
+Media.STREAM_MUSIC = 3;
+Media.STREAM_NOTIFICATION = 5;
+Media.STREAM_RING = 2;
+Media.STREAM_SYSTEM = 1;
+Media.STREAM_VOICE_CALL = 0;
+
 // "static" function to return existing objs.
 Media.get = function(id) {
     return mediaObjects[id];
 };
 
-Media.prototype.setVolume
+Media.prototype.setStreamId = function(cb, streamId) {
+    exec(cb, null, "Media", "setStreamId", [this.id, streamId]);
+};
 
 /**
  * Start or resume playing audio file.
@@ -273,4 +284,3 @@ if (cordova.platformId === 'android' || cordova.platformId === 'amazon-fireos' |
         channel.initializationComplete('onMediaPluginReady');
     });
 }
-

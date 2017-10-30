@@ -22,6 +22,7 @@ package com.commontime.cordova.audio;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -49,17 +50,21 @@ import java.io.IOException;
  */
 public class AudioPlayer implements OnCompletionListener, OnPreparedListener, OnErrorListener {
 
+    public void setStreamId(int streamId) {
+        this.streamId = streamId;
+    }
+
     // AudioPlayer modes
     public enum MODE { NONE, PLAY, RECORD };
 
     // AudioPlayer states
     public enum STATE { MEDIA_NONE,
-                        MEDIA_STARTING,
-                        MEDIA_RUNNING,
-                        MEDIA_PAUSED,
-                        MEDIA_STOPPED,
-                        MEDIA_LOADING
-                      };
+        MEDIA_STARTING,
+        MEDIA_RUNNING,
+        MEDIA_PAUSED,
+        MEDIA_STOPPED,
+        MEDIA_LOADING
+    };
 
     private static final String LOG_TAG = "AudioPlayer";
 
@@ -90,6 +95,8 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
     private MediaPlayer player = null;      // Audio player object
     private boolean prepareOnly = true;     // playback after file prepare flag
     private int seekOnPrepared = 0;     // seek to this location once media is prepared
+
+    private int streamId = AudioManager.STREAM_MUSIC;
 
     /**
      * Constructor.
@@ -138,44 +145,44 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
      */
     public void startRecording(String file) {
         switch (this.mode) {
-        case PLAY:
-            Log.d(LOG_TAG, "AudioPlayer Error: Can't record in play mode.");
-            sendErrorStatus(MEDIA_ERR_ABORTED);
-            break;
-        case NONE:
-            // if file exists, delete it
-            // Only new file are created with startRecording
+            case PLAY:
+                Log.d(LOG_TAG, "AudioPlayer Error: Can't record in play mode.");
+                sendErrorStatus(MEDIA_ERR_ABORTED);
+                break;
+            case NONE:
+                // if file exists, delete it
+                // Only new file are created with startRecording
 
-            File f = new File(file);
-            f.delete();
+                File f = new File(file);
+                f.delete();
 
-            this.audioFile = file;
-            this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                this.audioFile = file;
+                this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 
-            //Modified by REM 06/15/2015 to generate MPEG_4 output
-            this.recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            this.recorder.setAudioChannels(1); // single channel
-            this.recorder.setAudioSamplingRate(44100); // 44.1 kHz for decent sound, similar to stock iOS media plugin
-            this.recorder.setAudioEncodingBitRate(32000); // low bit rate
+                //Modified by REM 06/15/2015 to generate MPEG_4 output
+                this.recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                this.recorder.setAudioChannels(1); // single channel
+                this.recorder.setAudioSamplingRate(44100); // 44.1 kHz for decent sound, similar to stock iOS media plugin
+                this.recorder.setAudioEncodingBitRate(32000); // low bit rate
 
-            this.recorder.setOutputFile(this.tempFile);
-            try {
-                this.recorder.prepare();
-                this.recorder.start();
-                this.setState(STATE.MEDIA_RUNNING);
-                return;
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                this.recorder.setOutputFile(this.tempFile);
+                try {
+                    this.recorder.prepare();
+                    this.recorder.start();
+                    this.setState(STATE.MEDIA_RUNNING);
+                    return;
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-            sendErrorStatus(MEDIA_ERR_ABORTED);
-            break;
-        case RECORD:
-            Log.d(LOG_TAG, "AudioPlayer Error: Already recording.");
-            sendErrorStatus(MEDIA_ERR_ABORTED);
+                sendErrorStatus(MEDIA_ERR_ABORTED);
+                break;
+            case RECORD:
+                Log.d(LOG_TAG, "AudioPlayer Error: Already recording.");
+                sendErrorStatus(MEDIA_ERR_ABORTED);
         }
     }
 
@@ -188,60 +195,60 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
      */
     public void startRecordingWithCompression(String file, Integer channels, Integer sampleRate) {
         switch (this.mode) {
-        case PLAY:
-            Log.d(LOG_TAG, "AudioPlayer Error: Can't record in play mode.");
-            sendErrorStatus(MEDIA_ERR_ABORTED);
-            break;
-        case NONE:
-            // if file exists, delete it
-            // Only new file are created with startRecording
+            case PLAY:
+                Log.d(LOG_TAG, "AudioPlayer Error: Can't record in play mode.");
+                sendErrorStatus(MEDIA_ERR_ABORTED);
+                break;
+            case NONE:
+                // if file exists, delete it
+                // Only new file are created with startRecording
 
-            File f = new File(file);
-            f.delete();
-            this.audioFile = file;
+                File f = new File(file);
+                f.delete();
+                this.audioFile = file;
 
-            this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            this.recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                this.recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
 
-            this.recorder.setAudioChannels(channels);
-            this.recorder.setAudioSamplingRate(sampleRate);
+                this.recorder.setAudioChannels(channels);
+                this.recorder.setAudioSamplingRate(sampleRate);
 
-            // On Android with MPEG4/AAC, bitRate affects file size, surprisingly, sample rate does not.
-            // So we adjust the bit rate for better compression, based on requested sample rate.
-            Integer bitRate = 32000; // default bit rate
-            if (sampleRate < 30000) {
-                bitRate = 16384;
-            }
-            if (sampleRate < 16000) {
-                bitRate = 8192;
-            }
-            this.recorder.setAudioEncodingBitRate(bitRate);
+                // On Android with MPEG4/AAC, bitRate affects file size, surprisingly, sample rate does not.
+                // So we adjust the bit rate for better compression, based on requested sample rate.
+                Integer bitRate = 32000; // default bit rate
+                if (sampleRate < 30000) {
+                    bitRate = 16384;
+                }
+                if (sampleRate < 16000) {
+                    bitRate = 8192;
+                }
+                this.recorder.setAudioEncodingBitRate(bitRate);
 
-            Log.d(LOG_TAG, "MPEG-4 recording started with bit rate of " + bitRate + ", sample rate of " + sampleRate + "hz, " + channels + " audio channel(s)");
+                Log.d(LOG_TAG, "MPEG-4 recording started with bit rate of " + bitRate + ", sample rate of " + sampleRate + "hz, " + channels + " audio channel(s)");
 
-            this.recorder.setOutputFile(this.tempFile);
-            try {
-                this.recorder.prepare();
-                this.recorder.start();
-                this.setState(STATE.MEDIA_RUNNING);
-                return;
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                this.recorder.setOutputFile(this.tempFile);
+                try {
+                    this.recorder.prepare();
+                    this.recorder.start();
+                    this.setState(STATE.MEDIA_RUNNING);
+                    return;
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-            sendErrorStatus(MEDIA_ERR_ABORTED);
-            break;
-        case RECORD:
-            Log.d(LOG_TAG, "AudioPlayer Error: Already recording.");
-            sendErrorStatus(MEDIA_ERR_ABORTED);
+                sendErrorStatus(MEDIA_ERR_ABORTED);
+                break;
+            case RECORD:
+                Log.d(LOG_TAG, "AudioPlayer Error: Already recording.");
+                sendErrorStatus(MEDIA_ERR_ABORTED);
         }
     }
 
 
-	 /**
+    /**
      * Resume recording the specified file.
      *
      * @param file              The name of the file
@@ -266,7 +273,7 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
 
                 // On Android with MPEG4/AAC, bitRate affects file size, surprisingly, sample rate does not.
                 // So we adjust the bit rate for better compression, based on requested sample rate.
-                 Integer bitRate = 32000; // default bit rate
+                Integer bitRate = 32000; // default bit rate
                 if (sampleRate < 30000) {
                     bitRate = 16384;
                 }
@@ -319,9 +326,9 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
         String logMsg = "renaming " + this.tempFile + " to " + file;
         Log.d(LOG_TAG, logMsg);
 
-		if (f.exists()) {
-			if (!f.renameTo(new File(file))) Log.e(LOG_TAG, "FAILED " + logMsg);
-		}
+        if (f.exists()) {
+            if (!f.renameTo(new File(file))) Log.e(LOG_TAG, "FAILED " + logMsg);
+        }
     }
 
 
@@ -367,7 +374,7 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
     }
 
 
-	 /**
+    /**
      * Pause recording (simulated), stop recording and append to the file specified when recording started.
      */
     public void pauseRecording() {
@@ -452,7 +459,7 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
         }
     }
 
-	 /**
+    /**
      * Get db Recording Level.
      *
      * @return    double dbLevel
@@ -534,13 +541,13 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
     }
 
     /**
-      * Get the duration of the audio file.
-      *
-      * @param file             The name of the audio file.
-      * @return                 The duration in msec.
-      *                             -1=can't be determined
-      *                             -2=not allowed
-      */
+     * Get the duration of the audio file.
+     *
+     * @param file             The name of the audio file.
+     * @return                 The duration in msec.
+     *                             -1=can't be determined
+     *                             -2=not allowed
+     */
     public float getDuration(String file) {
 
         // Can't get duration of recording
@@ -669,15 +676,15 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
      */
     private boolean playMode() {
         switch(this.mode) {
-        case NONE:
-            this.setMode(MODE.PLAY);
-            break;
-        case PLAY:
-            break;
-        case RECORD:
-            Log.d(LOG_TAG, "AudioPlayer Error: Can't play in record mode.");
-            sendErrorStatus(MEDIA_ERR_ABORTED);
-            return false; //player is not ready
+            case NONE:
+                this.setMode(MODE.PLAY);
+                break;
+            case PLAY:
+                break;
+            case RECORD:
+                Log.d(LOG_TAG, "AudioPlayer Error: Can't play in record mode.");
+                sendErrorStatus(MEDIA_ERR_ABORTED);
+                return false; //player is not ready
         }
         return true;
     }
@@ -766,6 +773,7 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
                 }
                 android.content.res.AssetFileDescriptor fd = this.handler.cordova.getActivity().getAssets().openFd(f);
                 this.player.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getLength());
+                this.player.setAudioStreamType(streamId);
             }
             else {
                 File fp = new File(file);
@@ -778,13 +786,14 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
                     this.player.setDataSource(Environment.getExternalStorageDirectory().getPath() + "/" + file);
                 }
             }
-                this.setState(STATE.MEDIA_STARTING);
-                this.player.setOnPreparedListener(this);
-                this.player.prepare();
+            this.setState(STATE.MEDIA_STARTING);
+            this.player.setOnPreparedListener(this);
+            this.player.setAudioStreamType(streamId);
+            this.player.prepare();
 
-                // Get duration
-                this.duration = getDurationInSeconds();
-            }
+            // Get duration
+            this.duration = getDurationInSeconds();
+        }
     }
 
     private void sendErrorStatus(int errorCode) {
