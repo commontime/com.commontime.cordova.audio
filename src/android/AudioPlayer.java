@@ -50,8 +50,22 @@ import java.io.IOException;
  */
 public class AudioPlayer implements OnCompletionListener, OnPreparedListener, OnErrorListener {
 
-    public void setStreamId(int streamId) {
-        this.streamId = streamId;
+    public void setStreamId(String id) {
+        if(id.equals("music")) {
+            streamId = AudioManager.STREAM_MUSIC;
+        } else if(id.equals("notification")) {
+            streamId = AudioManager.STREAM_NOTIFICATION;
+        } else if(id.equals("ring")) {
+            streamId = AudioManager.STREAM_RING;
+        } else if(id.equals("alarm")) {
+            streamId = AudioManager.STREAM_ALARM;
+        } else if(id.equals("voice")) {
+            streamId = AudioManager.STREAM_VOICE_CALL;
+        } else if(id.equals("system")) {
+            streamId = AudioManager.STREAM_SYSTEM;
+        } else if(id.equals("dtmf")) {
+            streamId = AudioManager.STREAM_DTMF;
+        }
     }
 
     // AudioPlayer modes

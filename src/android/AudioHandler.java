@@ -236,7 +236,7 @@ public class AudioHandler extends CordovaPlugin {
 
         else if (action.equals("setStreamId")) {
             String id = args.getString(0);
-            int streamId = args.getInt(1);
+            String streamId = args.getString(1);
             setAudioStreamId(id, streamId);
             callbackContext.success();
             return true;
@@ -268,7 +268,7 @@ public class AudioHandler extends CordovaPlugin {
         return true;
     }
 
-    private void setAudioStreamId(String id, int streamId) {
+    private void setAudioStreamId(String id, String streamId) {
         AudioPlayer ret = players.get(id);
         if(ret != null) {
             ret.setStreamId(streamId);
