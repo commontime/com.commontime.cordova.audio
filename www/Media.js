@@ -269,8 +269,8 @@ Media.setDeviceVolume = function (successCallback, failCallback, volume, stream)
     exec(successCallback, failCallback, "Media", "setDeviceVolume", [volume, stream]);
 };
 
-Media.getDeviceVolume = function (successCallback, failCallback) {
-    exec(successCallback, failCallback, "Media", "getDeviceVolume", []);
+Media.getDeviceVolume = function (successCallback, failCallback, stream) {
+    exec(successCallback, failCallback, "Media", "getDeviceVolume", [stream]);
 };
 
 module.exports = Media;
