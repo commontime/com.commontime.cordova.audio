@@ -210,6 +210,35 @@ public class AudioHandler extends CordovaPlugin {
             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int)vol, 0);
             callbackContext.success();
             return true;
+        } else if( action.equals("getDeviceVolume")) {
+            int stream = args.getInt(0);
+            int streamVolume = 0;
+            int streamMaxVolume = 0;
+            try {
+                AudioManager audioManager = (AudioManager)cordova.getActivity().getSystemService(Context.AUDIO_SERVICE);
+                streamVolume = audioManager.getStreamVolume(stream);
+                streamMaxVolume = audioManager.getStreamMaxVolume(stream);
+                double vol = (double) streamVolume / (double) streamMaxVolume;
+                callbackContext.success(""+vol);
+            } catch (Exception e) {
+                e.printStackTrace();
+                callbackContext.error(e.getMessage());
+            }
+            return true;
+        } else if( action.equals("setDeviceVolume")) {
+            double volume = args.getDouble(0);
+            int stream = args.getInt(1);
+            try {
+                AudioManager audioManager = (AudioManager)cordova.getActivity().getSystemService(Context.AUDIO_SERVICE);
+                int streamMaxVolume = audioManager.getStreamMaxVolume(stream);
+                double vol = (double)streamMaxVolume * volume;
+                audioManager.setStreamVolume(stream, (int)vol, 0);
+                callbackContext.success();
+            } catch (Exception e) {
+                e.printStackTrace();
+                callbackContext.error(e.getMessage());
+            }
+            return true;
         } else if (action.equals("setVolume")) {
             try {
                 this.setVolume(args.getString(0), Float.parseFloat(args.getString(1)));
