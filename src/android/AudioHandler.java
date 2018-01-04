@@ -32,7 +32,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-import org.apache.cordova.PermissionHelper;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,8 +95,8 @@ public class AudioHandler extends CordovaPlugin {
         {
             if(Build.VERSION.SDK_INT >= 23)
             {
-                boolean hasRecordAudioPermission = PermissionHelper.hasPermission(this, Manifest.permission.RECORD_AUDIO);
-                boolean hasStoragePermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+                boolean hasRecordAudioPermission = cordova.hasPermission(Manifest.permission.RECORD_AUDIO);
+                boolean hasStoragePermission = cordova.hasPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
 
                 String[] permissions = null;
 
@@ -112,7 +111,7 @@ public class AudioHandler extends CordovaPlugin {
                 {
                     id = args.getString(0);
                     target = args.getString(1);
-                    PermissionHelper.requestPermissions(this, RECORD_AUDIO_WITHOUT_COMPRESSION_PERMISSION_REQUEST, permissions);
+                    cordova.requestPermissions(this, RECORD_AUDIO_WITHOUT_COMPRESSION_PERMISSION_REQUEST, permissions);
                 }
                 else
                 {
@@ -129,8 +128,8 @@ public class AudioHandler extends CordovaPlugin {
 
             if(Build.VERSION.SDK_INT >= 23)
             {
-                boolean hasRecordAudioPermission = PermissionHelper.hasPermission(this, Manifest.permission.RECORD_AUDIO);
-                boolean hasStoragePermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+                boolean hasRecordAudioPermission = cordova.hasPermission(Manifest.permission.RECORD_AUDIO);
+                boolean hasStoragePermission = cordova.hasPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
 
                 String[] permissions = null;
 
@@ -146,7 +145,7 @@ public class AudioHandler extends CordovaPlugin {
                     id = args.getString(0);
                     target = args.getString(1);
                     options = args.getJSONObject(2);
-                    PermissionHelper.requestPermissions(this, RECORD_AUDIO_WITH_COMPRESSION_PERMISSION_REQUEST, permissions);
+                    cordova.requestPermissions(this, RECORD_AUDIO_WITH_COMPRESSION_PERMISSION_REQUEST, permissions);
                 }
                 else
                 {
