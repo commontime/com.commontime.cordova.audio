@@ -1,6 +1,6 @@
 {
   "name": "com.commontime.cordova.audio",
-  "version": "0.9.14",
+  "version": "0.9.23",
   "description": "Cordova Media Plugin with MPEG 4 audio compression for iOS, Android and WP8",
   "cordova": {
     "id": "com.commontime.cordova.audio",

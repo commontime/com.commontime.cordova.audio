@@ -544,7 +544,7 @@ for significantly better compression.
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
-- (void)getDeviceMediaVolume:(CDVInvokedUrlCommand *)command
+- (void)getDeviceVolume:(CDVInvokedUrlCommand *)command
 {
     if (volumeSlider == nil) {
         [self addVolumeSlider];
@@ -558,7 +558,7 @@ for significantly better compression.
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
-- (void)setDeviceMediaVolume:(CDVInvokedUrlCommand *)command
+- (void)setDeviceVolume:(CDVInvokedUrlCommand *)command
 {
     if (volumeSlider == nil) {
         [self addVolumeSlider];
