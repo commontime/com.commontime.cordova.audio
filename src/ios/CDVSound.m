@@ -565,6 +565,8 @@ for significantly better compression.
     }
     NSString *volume = [command argumentAtIndex:0];
     volumeSlider.value = [volume doubleValue];
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
 - (void)startRecordingAudio:(CDVInvokedUrlCommand*)command
