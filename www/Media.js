@@ -87,22 +87,6 @@ Media.prototype.setStreamId = function (cb, streamId) {
     }
 };
 
-Media.prototype.setRingerMode = function (cb, mode) {
-    if (cordova.platformId === 'android') {
-        exec(cb, null, "Media", "setRingerMode", [mode]);
-    } else {
-        cb();
-    }
-};
-
-Media.prototype.getRingerMode = function (cb) {
-    if (cordova.platformId === 'android') {
-        exec(cb, null, "Media", "getRingerMode", []);
-    } else {
-        cb();
-    }
-};
-
 /**
  * Start or resume playing audio file.
  */
@@ -287,6 +271,22 @@ Media.setDeviceVolume = function (successCallback, failCallback, volume, stream)
 
 Media.getDeviceVolume = function (successCallback, failCallback, stream) {
     exec(successCallback, failCallback, "Media", "getDeviceVolume", [stream]);
+};
+
+Media.setRingerMode = function (successCallback, failCallback, mode) {
+    if (cordova.platformId === 'android') {
+        exec(successCallback, failCallback, "Media", "setRingerMode", [mode]);
+    } else {
+        successCallback();
+    }
+};
+
+Media.getRingerMode = function (successCallback, failCallback) {
+    if (cordova.platformId === 'android') {
+        exec(successCallback, failCallback, "Media", "getRingerMode", []);
+    } else {
+        successCallback(0);
+    }
 };
 
 module.exports = Media;
