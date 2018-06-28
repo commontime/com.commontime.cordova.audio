@@ -272,6 +272,19 @@ public class AudioHandler extends CordovaPlugin {
             return true;
         }
 
+        else if (action.equals("setRingerMode")) {
+            String ringerMode = args.getString(0);
+            setRingerMode(ringerMode);
+            callbackContext.success();
+            return true;
+        }
+
+        else if (action.equals("getRingerMode")) {            
+            int mode = getRingerMode();
+            callbackContext.sendPluginResult(new PluginResult(status, mode));
+            return true;
+        }
+
         //---
 
         else if (action.equals("create")) {
@@ -296,6 +309,16 @@ public class AudioHandler extends CordovaPlugin {
         callbackContext.sendPluginResult(new PluginResult(status, result));
 
         return true;
+    }
+
+    private void setRingerMode(int mode) {
+        AudioManager am = (AudioManager) this.cordova.getActivity().getSystemService(Context.AUDIO_SERVICE);
+        am.setRingerMode(mode);
+    }
+
+    private int getRingerMode() {
+        AudioManager am = (AudioManager) this.cordova.getActivity().getSystemService(Context.AUDIO_SERVICE);
+        return am.getRingerMode();
     }
 
     private int getStreamIdForName(String id) {

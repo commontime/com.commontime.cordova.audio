@@ -87,6 +87,22 @@ Media.prototype.setStreamId = function (cb, streamId) {
     }
 };
 
+Media.prototype.setRingerMode = function (cb, mode) {
+    if (cordova.platformId === 'android') {
+        exec(cb, null, "Media", "setRingerMode", [mode]);
+    } else {
+        cb();
+    }
+};
+
+Media.prototype.getRingerMode = function (cb) {
+    if (cordova.platformId === 'android') {
+        exec(cb, null, "Media", "getRingerMode", []);
+    } else {
+        cb();
+    }
+};
+
 /**
  * Start or resume playing audio file.
  */
