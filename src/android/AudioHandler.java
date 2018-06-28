@@ -273,7 +273,7 @@ public class AudioHandler extends CordovaPlugin {
         }
 
         else if (action.equals("setRingerMode")) {
-            String ringerMode = args.getInt(0);
+            int ringerMode = args.getInt(0);
             setRingerMode(ringerMode);
             callbackContext.success();
             return true;
