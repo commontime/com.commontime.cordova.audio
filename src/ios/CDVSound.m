@@ -450,6 +450,8 @@ for significantly better compression.
     }  // ignore if no media playing
     if (jsString) {
         [self.commandDelegate evalJs:jsString];
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
 }
 
