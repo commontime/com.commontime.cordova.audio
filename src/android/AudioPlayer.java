@@ -718,6 +718,9 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
                     try {
                         this.loadAudioFile(file);
                     } catch (Exception e) {
+                    	Log.d(LOG_TAG, "Load File Exception: " + e.toString());
+                        Log.d(LOG_TAG, "---------------------------");
+                        Log.d(LOG_TAG, "Load File Exception: " + e.getMessage());
                         sendErrorStatus(MEDIA_ERR_ABORTED);
                     }
                     return false;
@@ -764,7 +767,9 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
      * @throws IllegalArgumentException
      */
     private void loadAudioFile(String file) throws IllegalArgumentException, SecurityException, IllegalStateException, IOException {
+        Log.d(LOG_TAG, "Load Audio File: " + file);
         if (this.isStreaming(file)) {
+        	Log.d(LOG_TAG, "Load Audio File: A");
             this.player.setDataSource(file);
             this.player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             //if it's a streaming file, play mode is implied
@@ -775,6 +780,7 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
         }
         else {
             if (file.startsWith("/android_asset/") || file.contains("user-assets")) {
+        		Log.d(LOG_TAG, "Load Audio File: B");
                 String f = null;
                 if(file.contains("user-assets")) {
                     if(!file.contains("www/"))  {
@@ -790,6 +796,7 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
                 this.player.setAudioStreamType(streamId);
             }
             else {
+            	Log.d(LOG_TAG, "Load Audio File: C");
                 File fp = new File(file);
                 if (fp.exists()) {
                     FileInputStream fileInputStream = new FileInputStream(file);
